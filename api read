@@ -1,0 +1,34 @@
+import requests
+
+def get_weather(latitude, longitude):
+    # Definiere die URL der Open-Meteo-API und die Parameter
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": latitude,        # Breitengrad
+        "longitude": longitude,      # Längengrad
+        "current_weather": True      # Fordert aktuelle Wetterdaten an
+    }
+    
+    # Führe die API-Anfrage durch
+    response = requests.get(url, params=params)
+    
+    # Überprüfe, ob die Anfrage erfolgreich war
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Extrahiere die benötigten Wetterinformationen
+        current_weather = data.get("current_weather")
+        if current_weather:
+            temperature = current_weather.get("temperature")
+            windspeed = current_weather.get("windspeed")
+            print(f"Aktuelle Temperatur: {temperature}°C")
+            print(f"Aktuelle Windgeschwindigkeit: {windspeed} km/h")
+        else:
+            print("Keine aktuellen Wetterdaten verfügbar.")
+    else:
+        print("Fehler bei der API-Anfrage:", response.status_code)
+
+# Beispielaufruf der Funktion
+latitude = 52.52    # Beispiel: Berlin, Deutschland
+longitude = 13.405
+get_weather(latitude, longitude)
