@@ -5,10 +5,11 @@ from retry_requests import retry
 from typing import Dict, Any
 
 class WeatherData:
-    def __init__(self, latitude: float, longitude: float, past_days: int, timezone: str = "Europe/Berlin") -> None:
+    def __init__(self, latitude: float, longitude: float, past_days: int, forecast_days: int = 3, timezone: str = "Europe/Berlin") -> None:
         self.latitude: float = latitude
         self.longitude: float = longitude
         self.past_days: int = past_days
+        self.forecast_days: int = forecast_days
         self.timezone: str = timezone
 
         # Setup für die API-Anfragen
@@ -23,7 +24,8 @@ class WeatherData:
             "current": ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "rain", "showers", "snowfall", "cloud_cover", "wind_speed_10m"],
             "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation_probability", "precipitation", "rain", "showers", "snowfall", "snow_depth", "cloud_cover", "wind_speed_10m"],
             "timezone": self.timezone,
-            "past_days": self.past_days
+            "past_days": self.past_days,
+            "forecast_days": self.forecast_days
         }
 
         # API-Antworten
@@ -98,18 +100,40 @@ class WeatherData:
         self.hourly_dataframe.to_csv('hourly_weather.csv', index=False)
         print(f"Hourly weather saved to 'hourly_weather.csv'")
 
-# Nutzung der Klasse
-latitude = 50.935173  # Köln
-longitude = 6.95310
-past_days = 92  # 3 Monate
-weather = WeatherData(latitude, longitude, past_days)
 
-# Ausgabe und Speichern der aktuellen Wetterdaten
-weather.print_current_weather()
 
-# Ausgabe und Speichern der stündlichen Wetterdaten
-weather.print_hourly_weather()
 
-# Ausgabe der höchsten Temperatur der stündlichen Daten
-highest_temp = weather.get_highest_temperature()
-print(f"Highest temperature: {highest_temp} °C")
+def main():
+
+    # Nutzung der Klasse
+    latitude = 50.935173  # Köln
+    longitude = 6.95310
+    past_days = 0  # 92  # 3 Monate
+    forecast_days = 6  # Wettervorhersage für x Tage
+    weather = WeatherData(latitude, longitude, past_days, forecast_days)
+
+    # Ausgabe und Speichern der aktuellen Wetterdaten
+    weather.print_current_weather()
+
+    # Ausgabe und Speichern der stündlichen Wetterdaten
+    weather.print_hourly_weather()
+#    print(weather.hourly_dataframe)
+    # Ausgabe der höchsten Temperatur der stündlichen Daten
+    highest_temp = weather.get_highest_temperature()
+    #print(f"Highest temperature: {highest_temp} °C")
+
+ #   print(weather.hourly_dataframe['precipitation_probability'])
+    result = weather.hourly_dataframe['precipitation_probability']
+    print(result.any(axis=0))
+
+    if result.any(axis=0) == True:
+         with open("output.txt", "w") as file:
+            file.write("1")
+    else:
+        with open("output.txt", "w") as file:
+            file.write("0")
+
+
+if __name__=="__main__":
+        main()
+
